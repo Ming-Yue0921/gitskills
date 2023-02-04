@@ -1,0 +1,55 @@
+
+
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: db-api-allow
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: flask
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: flask
+
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: backend-api
+spec:
+  podSelector:
+    matchLabels:
+      app: flask
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 5000
+
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: frontend-app
+spec:
+  podSelector:
+    matchLabels:
+      app: flask
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.252/32
+      ports:
+        - port: 988
